@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plain Constitution</title>
     <link rel="icon" href="scroll.png" type="image">
+    <link rel="apple-touch-icon" href="apple-icon.png" type="image">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -57,6 +58,10 @@
             background-color: var(--bg-color);
             line-height: 1.7;
             transition: background-color 0.3s, color 0.3s;
+        }
+
+        html.sans-serif-override {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
@@ -341,6 +346,9 @@
             font-family: serif;
             transition: opacity 0.2s;
         }
+        .sans-serif-override .toc-hint {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
         
         .hide-toc-hints .toc-hint {
             display: none;
@@ -402,7 +410,10 @@
             margin-top: 30px;
             margin-bottom: 12px;
             font-weight: bold;
-            scroll-margin-top: 80px; 
+            scroll-margin-top: 80px;
+
+            line-height: normal;
+            padding-bottom: 8px;
         }
 
         p {
@@ -438,6 +449,21 @@
         }
         nav.sidebar::-webkit-scrollbar-thumb:hover {
             background: rgba(0,0,0,0.2);
+        }
+
+        .section-hints {
+            margin-left: 1rem;
+            color: var(--accent-color);
+            font-style: italic;
+            font-weight: normal;
+            font-size: 1.4rem;
+        }
+        .subsection-hints {
+            margin-left: 0.5rem;
+            color: var(--accent-color);
+            font-style: italic;
+            font-weight: normal;
+            font-size: initial;
         }
 
         @media (max-width: 1024px) {
@@ -479,25 +505,31 @@
                 left: 0;
             }
             main.content {
-                padding: 30px 20px;
+                padding: 30px 2px;
                 box-shadow: none;
                 width: 100%;
             }
-        }
+            section {
+                margin-left: 20px;
+                margin-right: 20px;
+            }
 
-        .section-hints {
-            margin-left: 1rem;
-            color: var(--accent-color);
-            font-style: italic;
-            font-weight: normal;
-            font-size: 1.4rem;
-        }
-        .subsection-hints {
-            margin-left: 0.5rem;
-            color: var(--accent-color);
-            font-style: italic;
-            font-weight: normal;
-            font-size: initial;
+            .section-hints {
+                font-size: 1.2rem;
+                padding-bottom: 5px;
+                line-height: 1;
+            }
+            h2.section-title {
+                padding-bottom: 0;
+                margin-bottom: 5px;
+            }
+            h3.subsection-title {
+                line-height: 1.1;
+            }
+
+            .preamble-text {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -544,6 +576,13 @@
                 </div>
             </div>
 
+            <div class="setting-item">
+                <label for="fontOverrideToggle">Sans-Serif Override</label>
+                <label class="switch" for="fontOverrideToggle">
+                    <input type="checkbox" id="fontOverrideToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
 
         </div>
     </div>
@@ -758,7 +797,7 @@
                 <h2 class="section-title" data-num="VII">Article <span class="art-num">VII</span></h2><span class="section-hints">Ratification by the Colonies</span>
                 <p>The Ratification of the Conventions of nine States, shall be sufficient for the Establishment of this Constitution between the States so ratifying the Same.</p>
                 <p>Done in Convention by the Unanimous Consent of the States present the Seventeenth Day of September in the Year of our Lord one thousand seven hundred and Eighty seven and of the Independence of the United States of America the Twelfth In Witness whereof We have hereunto subscribed our Names,</p>
-                <p style="margin-bottom: 0;">Go. Washington—Presidt.</p>
+                <p style="margin-bottom: 0;">Gᵒ. Washington—Presidᵗ.</p>
                 <p style="margin-bottom: 0;">And deputy from Virginia </p>
                 <details><summary style="opacity: 50%; cursor: pointer;">All signers</summary>
                     <p style="margin-bottom: 0;">New Hampshire: John Langdon, Nicholas Gilman</p>
@@ -1003,9 +1042,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+            window.scrollTo(0, 0);
+            
             const sections = document.querySelectorAll('main.content section');
             let isClickScrolling = false; 
             let clickScrollTimeout;
+
+            let isInitialLoad = true;
 
             // map roman numerls
             const romanToArabicMap = {
@@ -1074,10 +1120,12 @@
                     }
                 });
 
-                targetLink.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
-                });
+                if (!isInitialLoad) {
+                    targetLink.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
             }
 
             allNavLinks.forEach(link => {
@@ -1121,6 +1169,10 @@
 
             elementsToObserve.forEach(el => observer.observe(el));
 
+            setTimeout(() => {
+                isInitialLoad = false;
+            }, 150);
+
             const settingsToggleBtn = document.getElementById('settingsToggleBtn');
             const settingsPanel = document.getElementById('settingsPanel');
             const darkModeToggle = document.getElementById('darkModeToggle');
@@ -1128,6 +1180,7 @@
             const textHintsToggle = document.getElementById('textHintsToggle');
             const numRomanBtn = document.getElementById('numRomanBtn');
             const numArabBtn = document.getElementById('numArabBtn');
+            const fontOverrideToggle = document.getElementById('fontOverrideToggle');
 
             function setNumberingMode(mode) {
                 const structuralContainers = document.querySelectorAll('[data-num]');
@@ -1181,6 +1234,14 @@
                 numArabBtn.classList.remove('active');
                 numRomanBtn.classList.add('active');
                 setNumberingMode('roman');
+            }
+
+            if (localStorage.getItem('font-override') === 'true') {
+                document.documentElement.classList.add('sans-serif-override');
+                fontOverrideToggle.checked = true;
+            } else {
+                document.documentElement.classList.remove('sans-serif-override');
+                fontOverrideToggle.checked = false;
             }
 
 
@@ -1238,6 +1299,16 @@
                 numArabBtn.classList.add('active');
                 setNumberingMode('arabic');
                 localStorage.setItem('numbering-mode', 'arabic');
+            });
+
+            fontOverrideToggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    document.documentElement.classList.add('sans-serif-override');
+                    localStorage.setItem('font-override', 'true');
+                } else {
+                    document.documentElement.classList.remove('sans-serif-override');
+                    localStorage.setItem('font-override', 'false');
+                }
             });
 
             // SWIPE GESTURES FOR MOBILE SIDEBAR
