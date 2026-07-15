@@ -33,7 +33,7 @@
             --nav-link-hover-bg: #334155;
             --nav-sublink-color: #64748b;
             --nav-sublink-hover-bg: #334155;
-            --accent-color: #fbbf24;
+            --accent-color: #b8860b;
             --border-color: #334155;
             --selection-bg: #475569;
             --preamble-bg: #222f43;
@@ -450,22 +450,38 @@
         }
 
         @media (max-width: 768px) {
+            html, body {
+                overflow-x: hidden;
+            }
             body {
                 padding: 10px;
             }
             .content-wrapper {
                 flex-direction: column;
                 align-items: stretch;
+                width: 100%;
+                overflow-x: hidden;
             }
             nav.sidebar {
-                position: relative;
+                position: fixed;
                 top: 0;
+                right: -100%;
                 width: 100%;
-                height: 250px;
+                height: 100vh;
+                max-height: 100vh;
+                z-index: 1001;
+                transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                border-radius: 0;
+                border: none;
+                box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+            }
+            nav.sidebar.open {
+                right: 0;
             }
             main.content {
                 padding: 30px 20px;
                 box-shadow: none;
+                width: 100%;
             }
         }
 
@@ -1042,6 +1058,7 @@
 
             const allNavLinks = document.querySelectorAll('nav.sidebar a');
             const elementsToObserve = document.querySelectorAll('main.content section, main.content h3.subsection-title');
+            const sidebar = document.querySelector('nav.sidebar');
 
             function setActiveLink(targetLink) {
                 if (!targetLink) return;
@@ -1067,6 +1084,8 @@
                 link.addEventListener('click', (e) => {
                     isClickScrolling = true;
                     setActiveLink(link);
+
+                    sidebar.classList.remove('open');
 
                     clearTimeout(clickScrollTimeout);
                     clickScrollTimeout = setTimeout(() => {
@@ -1220,6 +1239,38 @@
                 setNumberingMode('arabic');
                 localStorage.setItem('numbering-mode', 'arabic');
             });
+
+            // SWIPE GESTURES FOR MOBILE SIDEBAR
+            let touchstartX = 0;
+            let touchstartY = 0;
+            let touchendX = 0;
+            let touchendY = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.settings-container')) return;
+                touchstartX = e.changedTouches[0].screenX;
+                touchstartY = e.changedTouches[0].screenY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                if (e.target.closest('.settings-container')) return;
+                touchendX = e.changedTouches[0].screenX;
+                touchendY = e.changedTouches[0].screenY;
+                handleSwipeGesture();
+            }, { passive: true });
+
+            function handleSwipeGesture() {
+                const diffX = touchstartX - touchendX;
+                const diffY = touchstartY - touchendY;
+
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                    if (diffX > 0) {
+                        sidebar.classList.add('open');
+                    } else {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            }
         });
     </script>
 </body>
