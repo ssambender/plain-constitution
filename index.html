@@ -465,18 +465,18 @@
             nav.sidebar {
                 position: fixed;
                 top: 0;
-                right: -100%;
+                left: -100%;
                 width: 100%;
                 height: 100vh;
                 max-height: 100vh;
                 z-index: 1001;
-                transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
                 border-radius: 0;
                 border: none;
-                box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+                box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
             }
             nav.sidebar.open {
-                right: 0;
+                left: 0;
             }
             main.content {
                 padding: 30px 20px;
@@ -1264,7 +1264,7 @@
                 const diffY = touchstartY - touchendY;
 
                 if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-                    if (diffX > 0) {
+                    if (diffX < 0) {
                         sidebar.classList.add('open');
                     } else {
                         sidebar.classList.remove('open');
